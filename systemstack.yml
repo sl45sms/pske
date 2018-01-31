@@ -1,6 +1,16 @@
 # Use tech_user/secret as user/password credentials
 version: '3'
 
+volumes:
+  mongo-volume: 
+    driver: local
+  formio-volume:
+    driver: local
+  db-volume:
+    driver: local
+  bonita-volume:
+    driver: local
+
 services:
   db:
     image: postgres:9.3
@@ -9,9 +19,13 @@ services:
     command:
       - -c
       - max_prepared_transactions=100
+    volumes:
+      - db-volume:/var/lib/postgresql/data
 
   mongodb:
     image: mongo
+    volumes:
+      - mongo-volume:/data/db
 
   formio-api:
     image: skarvelis/formio-api:1.0
@@ -27,6 +41,8 @@ services:
       - ADMIN_PASS=password
     depends_on:
       - mongodb
+    volumes:
+      - formio-volume:/app
 
   bonita:
     image: bonita
@@ -43,6 +59,8 @@ services:
       - HTTP_API=true
     depends_on:
       - db
+    volumes:
+      - bonita-volume:/opt/bonita
     entrypoint:
       - bash
       - -c
