@@ -121,8 +121,8 @@ EOF
 sed -i "/var APP_URL = /c\var APP_URL = '$URL_PREFIX$APP_URL';" /app/client/dist/config.js
 sed -i "/var API_URL = /c\var API_URL = '$URL_PREFIX$API_URL';" /app/client/dist/config.js
 # for formbuilder
-sed -i "/var APP_URL = /c\var APP_URL = '$URL_PREFIX$APP_URL';" /app/app/client/dist/config.js
-sed -i "/var API_URL = /c\var API_URL = '$URL_PREFIX$API_URL';" /app/app/client/dist/config.js
+sed -i "/var APP_URL = /c\var APP_URL = '$URL_PREFIX$APP_URL';" /app/app/dist/config.js
+sed -i "/var API_URL = /c\var API_URL = '$URL_PREFIX$API_URL';" /app/app/dist/config.js
 
 
 ### finaly start application
