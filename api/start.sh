@@ -29,7 +29,7 @@
 
 ### Check if installed
     chown -R nodejs:nodejs /app 
-    if [ ! -f "/app/index.js" ]; then
+if [ ! -f "/app/index.js" ]; then
         echo '** [formio] No Data Found, Creating Fresh Install'
         apt-get update
         apt-get install -y \
@@ -47,8 +47,7 @@
         apt-get -y autoremove 
         apt-get clean 
         rm -rf /var/lib/apt/lists/*
-        touch /app/needs-install
-    fi
+     touch /app/needs-install
 
   # Set DB Parameters
     jsontmp=$(mktemp)
@@ -61,38 +60,37 @@
     jq '.email .username="'$MAIL_USER'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
     jq '.email .password="'$MAIL_PASS'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
 
-    if [ ! -z ${MYSQL_HOST}] ; then
-	    jq '.settings .database .mysql .host="'$MYSQL_HOST'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-	    jq '.settings .database .mysql .port="'$MYSQL_PORT'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json 
-	    jq '.settings .database .mysql .database="'$MYSQL_DB_NAME'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-	    jq '.settings .database .mysql .user="'$MYSQL_DB_USER'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-	    jq '.settings .database .mysql .password="'$MYSQL_DB_PASS'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-    fi
+if [ ! -z ${MYSQL_HOST}] ; then
+  jq '.settings .database .mysql .host="'$MYSQL_HOST'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+  jq '.settings .database .mysql .port="'$MYSQL_PORT'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json 
+  jq '.settings .database .mysql .database="'$MYSQL_DB_NAME'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+  jq '.settings .database .mysql .user="'$MYSQL_DB_USER'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+  jq '.settings .database .mysql .password="'$MYSQL_DB_PASS'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+fi
 
-    if [ ! -z ${MSSQL_HOST}] ; then
-	    jq '.settings .database .mssql .host="$'MSSQL_HOST'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-	    jq '.settings .database .mssql .port="$'MSSQL_PORT'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json 
-	    jq '.settings .database .mssql .database="'$MSSQL_DB_NAME'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-	    jq '.settings .database .mssql .user="'$MSSQL_DB_USER'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-	    jq '.settings .database .mssql .password="'$MSSQL_DB_PASS'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-    fi
+if [ ! -z ${MSSQL_HOST}] ; then
+  jq '.settings .database .mssql .host="$'MSSQL_HOST'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+  jq '.settings .database .mssql .port="$'MSSQL_PORT'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json 
+  jq '.settings .database .mssql .database="'$MSSQL_DB_NAME'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+  jq '.settings .database .mssql .user="'$MSSQL_DB_USER'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+  jq '.settings .database .mssql .password="'$MSSQL_DB_PASS'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+fi
 
-    if [ ! -z ${MAIL_SENDGRID_API_USER}] ; then
-    	jq '.settings .email .sendgrid .auth .api_user="'$MAIL_SENDGRID_API_USER'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-    	jq '.settings .email .sendgrid .auth .api_key="'$MAIL_SENDGRID_API_KEY'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-    fi
+if [ ! -z ${MAIL_SENDGRID_API_USER}] ; then
+  jq '.settings .email .sendgrid .auth .api_user="'$MAIL_SENDGRID_API_USER'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+  jq '.settings .email .sendgrid .auth .api_key="'$MAIL_SENDGRID_API_KEY'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+fi
 
-    if [ ! -z ${MAIL_GMAIL_USER}] ; then
-	    jq '.settings .email .gmail .auth .user="'$MAIL_GMAIL_USER'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-	    jq '.settings .email .gmail .auth .pass="'$MAIL_GMAIL_PASS'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-	fi
+if [ ! -z ${MAIL_GMAIL_USER}] ; then
+  jq '.settings .email .gmail .auth .user="'$MAIL_GMAIL_USER'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+  jq '.settings .email .gmail .auth .pass="'$MAIL_GMAIL_PASS'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+fi
 
-    if [ ! -z ${MAIL_MANDRILL_API_KEY}] ; then
-	    jq '.settings .email .mandrill .auth .apiKey="'$MAIL_MANDRILL_API_KEY'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
-    fi
+if [ ! -z ${MAIL_MANDRILL_API_KEY}] ; then
+  jq '.settings .email .mandrill .auth .apiKey="'$MAIL_MANDRILL_API_KEY'"' /app/config/default.json > "$jsontmp" && mv "$jsontmp" /app/config/default.json
+fi
 
-    if [ -f "/app/needs-install" ]; then
-        cat <<EOF > /tmp/install.sh
+cat <<EOF > /tmp/install.sh
 #!/usr/bin/expect
 
 cd /app
@@ -111,11 +109,9 @@ expect "Install successful!"
 send -- "\003"
 exit 0
 EOF
-        chmod +x /tmp/install.sh
-        sudo -u nodejs expect /tmp/install.sh
-        rm -rf /tmp/install.sh
-        rm -rf /app/needs-install
-    fi
+chmod +x /tmp/install.sh
+sudo -u nodejs expect /tmp/install.sh
+rm -rf /tmp/install.sh
 
 ### Change URLs
 sed -i "/var APP_URL = /c\var APP_URL = '$URL_PREFIX$APP_URL';" /app/client/dist/config.js
@@ -124,7 +120,9 @@ sed -i "/var API_URL = /c\var API_URL = '$URL_PREFIX$API_URL';" /app/client/dist
 sed -i "/var APP_URL = /c\var APP_URL = '$URL_PREFIX$APP_URL';" /app/app/dist/config.js
 sed -i "/var API_URL = /c\var API_URL = '$URL_PREFIX$API_URL';" /app/app/dist/config.js
 
+fi
 
 ### finaly start application
+cd /app
 sudo -u nodejs /usr/bin/node main.js
 

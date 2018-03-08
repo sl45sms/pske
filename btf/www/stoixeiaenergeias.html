@@ -1,0 +1,186 @@
+<html>
+  <head>
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='https://unpkg.com/formiojs@latest/dist/formio.full.min.css'>
+    <script src='https://unpkg.com/formiojs@latest/dist/formio.full.min.js'></script>
+     <script src="http://code.jquery.com/jquery-2.1.4.js"></script>
+    <script type='text/javascript'>
+      window.onload = function() {
+		  
+		  var urlParams = new URLSearchParams(window.location.search);
+		  var taskId = urlParams.get('id');
+		  
+		  
+      //  Formio.createForm(document.getElementById('formio'), 'http://147.102.4.106:3001/bonitaform');
+        
+        Formio.setUser({"data":{"email":"admin@example.com","password":"password"}})
+        
+        var apiToken= localStorage.getItem("X-Bonita-API-Token");
+         var formio = new Formio.createForm(document.getElementById('formio'), 'http://147.102.4.106:3001/stoixeiaenergeias',
+         {
+           hooks: {
+                 beforeSubmit: (submission, next) => {
+                    // Alter the submission
+                         
+                     console.log("submit",submission );
+                
+                var formData = { "folderNo" : submission.data.folderNo  };
+                
+
+                
+                console.log(formData,apiToken);
+	    // context ../API/bpm/userTask/{{taskId}}/context
+		// pdata ../{{context.basic_ref.link}}
+	    // 	pVars ../API/bpm/caseVariable?p=0&c=10&f=case_id={{ task.rootContainerId }}
+	    //	task  ../API/bpm/userTask/{{taskId}}
+	    //	taskId id
+	    
+	    //TODO execute step1
+	   
+	   	
+                Formio.currentUser().then(function(user) {
+                      console.log("user",user);
+                     });
+
+         
+          $.ajax({
+                         url: "http://10.1.32.95:8080/bonita/API/bpm/userTask/"+taskId+"/execution",
+                         type: "POST",
+                         contentType: "application/json",
+                         /*passing the X-Bonita-API-Token for the CSRF security filter*/
+                         headers: {'X-Bonita-API-Token': apiToken},
+                         data: JSON.stringify(formData),
+                         xhrFields: {withCredentials: true},
+                         success: function(edata, textStatus, jqXHR) {
+                           console.log('success execute',edata,textStatus);
+                           next();
+					   },
+					   
+         
+         
+                         error: function(jqXHR, textStatus, errorThrown) {
+                           console.log('error execute',textStatus);
+                           next(errorThrown)
+                         }
+                });              
+         
+         
+         
+                             // call to save on formio also.
+                 //   next();
+                      }
+				  }
+              }    
+         
+         
+         
+         
+         
+         
+         
+         
+         ).then(function(form) {
+			 
+	     //TODO load context and populate from bussines data an prossess variables
+          var context="";
+          var pdata="";
+          var task="";
+          
+                 $.ajax({
+                         url: "http://10.1.32.95:8080/bonita/API/bpm/userTask/"+taskId+"/context", //TODO pare to tskid apo to url query
+                         type: "GET",
+                         headers: {'X-Bonita-API-Token': apiToken},
+                          xhrFields: {withCredentials: true},
+                         success: function(context_json, textStatus, jqXHR) {
+
+						    context = context_json;
+							console.log("context",context);	 
+							 
+							 
+						$.ajax({
+                         url: "http://10.1.32.95:8080/bonita/"+context.basic_ref.link,
+                         type: "GET",
+                         headers: {'X-Bonita-API-Token': apiToken},
+                          xhrFields: {withCredentials: true},
+                         success: function(pdata_json, textStatus, jqXHR) {
+							 pdata=pdata_json;
+							 console.log("pdata",pdata);
+							 
+							 form.submission = {
+                                       data: {
+                                     name: pdata.name,
+                                      lastname: pdata.lastname,
+                                pvtest: 'joe@example.com'
+                                     }
+		                            }
+							 
+							 
+							 
+						 },
+                         error: function(jqXHR, textStatus, errorThrown) {
+                           console.log('error get pdata',textStatus);
+                         }
+					 })
+							 
+							 
+							 
+						 },
+                         error: function(jqXHR, textStatus, errorThrown) {
+                           console.log('error get context',textStatus);
+                         }
+					 })
+        
+        
+  //       form.submission = {
+  //            data: {
+  //              name: 'Joe',
+  //              lastname: 'Smith',
+  //              pvtest: 'joe@example.com'
+  //           }
+	//	 }
+        
+        
+        
+        
+        
+        form.on("submit", (submission) => {
+				 
+				 
+                 console.log('The form was just submitted!!!',submission);
+                  });
+                  
+               form.on('error', (errors) => {
+    console.log('We have errors!',errors);
+  })     
+  });
+};
+      
+      
+    //  formio.loadForm().then(function(form) {
+      
+        // Log the form schema.
+     //   console.log(form);
+        /*
+        formio.saveSubmission({data: {
+          firstName: 'Joe',
+          lastName: 'Smith',
+          pvtest: 'joe@example.com'
+        }}).then(function(submission) {
+        
+          // Log the full submission object.
+          console.log(submission);
+        });
+        */
+   ///   });
+        
+        
+
+      
+
+      
+    </script>
+  </head>
+  <body>
+    <div id='formio'></div>
+  </body>
+</html>

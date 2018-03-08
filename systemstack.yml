@@ -12,6 +12,18 @@ volumes:
     driver: local
 
 services:
+  node:
+    image: "node:9"
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./btf/:/home/node/app
+    ports:
+      - 10631:10631
+    command: "npm start"
+
   db:
     image: postgres:9.3
     environment:
@@ -33,7 +45,7 @@ services:
       - 3001:3001
       - 8080:8080
     environment:
-      - VIRTUAL_HOST=10.0.1.5:3001
+      - VIRTUAL_HOST=147.102.4.106:3001
       - REVERSE_PROXY=false
       - DB_HOST=mongodb
       - DB_NAME=formio
@@ -43,6 +55,18 @@ services:
       - mongodb
     volumes:
       - formio-volume:/app
+
+  desktop:
+    image: dorowu/ubuntu-desktop-lxde-vnc
+    ports:
+      - 6080:80
+      - 5900:5900
+    environment: 
+      - VNC_PASSWORD=str0ngpass
+      - USER=etsoft 
+      - PASSWORD=str0ngerpassw0rd
+    volumes:
+      - ./bondesktop/:/home/etsoft
 
   bonita:
     image: bonita
