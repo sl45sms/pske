@@ -61,6 +61,7 @@ services:
     ports:
       - 6080:80
       - 5900:5900
+      - 10000:8080
     environment: 
       - VNC_PASSWORD=str0ngpass
       - USER=etsoft 

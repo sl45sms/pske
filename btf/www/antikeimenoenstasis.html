@@ -7,44 +7,53 @@
     <script type='text/javascript'>
       window.onload = function() {
 		  
-		  var urlParams = new URLSearchParams(window.location.search);
-		  var taskId = urlParams.get('id');
-		  
-		  
-      //  Formio.createForm(document.getElementById('formio'), 'http://147.102.4.106:3001/bonitaform');
+		var urlParams = new URLSearchParams(window.location.search);
+		var taskId = urlParams.get('id');
+		console.log("taskid",taskId);
+		        
+               Formio.setUser({"data":{"email":"admin@example.com","password":"password"}})
+               Formio.currentUser().then(function(user) {console.log("formio user",user); });//just for info
+
         
-        Formio.setUser({"data":{"email":"admin@example.com","password":"password"}})
-        
-        var apiToken= localStorage.getItem("X-Bonita-API-Token");
+        var apiToken= localStorage.getItem("X-Bonita-API-Token");                                         /*step 1 name of form here*/
          var formio = new Formio.createForm(document.getElementById('formio'), 'http://147.102.4.106:3001/antikeimenoenstasis',
          {
            hooks: {
                  beforeSubmit: (submission, next) => {
-                    // Alter the submission
-                         
-                     console.log("submit",submission );
-                
-                var formData = { "folderNo" : submission.data.folderNo  };
-                
+                // Alter the submission       
+                console.log("on before submit, submition",submission );
+               
+                /*step 2 specific logic here for this page*/
+                var formData = { "summary" : submission.data.summary  };
 
-                
-                console.log(formData,apiToken);
-	    // context ../API/bpm/userTask/{{taskId}}/context
-		// pdata ../{{context.basic_ref.link}}
-	    // 	pVars ../API/bpm/caseVariable?p=0&c=10&f=case_id={{ task.rootContainerId }}
-	    //	task  ../API/bpm/userTask/{{taskId}}
-	    //	taskId id
-	    
-	    //TODO execute step1
-	   
-	   	
-                Formio.currentUser().then(function(user) {
-                      console.log("user",user);
-                     });
 
-         
-          $.ajax({
-                         url: "http://10.1.32.95:8080/bonita/API/bpm/userTask/"+taskId+"/execution",
+                console.log("on before submit, formdata",formData );
+                console.log("on before submit, apitoken",apiToken);
+        
+// assign before execute! 
+$.ajax({
+       url: "http://147.102.4.106:10000/bonita/API/bpm/userTask/"+taskId,
+       type: "GET",
+       headers: {'X-Bonita-API-Token': apiToken},
+       xhrFields: {withCredentials: true},
+       success: function(tdata, textStatus, jqXHR) {
+
+       console.log(tdata,tdata.caseId);
+
+       var caseId=tdata.caseId;
+
+    //todo get id for logged user for assign
+    $.ajax({
+       url: "http://147.102.4.106:10000/bonita/API/bpm/userTask/"+taskId,
+       type: "PUT",
+       headers: {'X-Bonita-API-Token': apiToken},
+       xhrFields: {withCredentials: true},
+       data: '{ "assigned_id" : "4" }',
+       success: function(adata, textStatus, jqXHR) {
+
+     
+        $.ajax({
+                         url: "http://147.102.4.106:10000/bonita/API/bpm/userTask/"+taskId+"/execution",
                          type: "POST",
                          contentType: "application/json",
                          /*passing the X-Bonita-API-Token for the CSRF security filter*/
@@ -52,131 +61,66 @@
                          data: JSON.stringify(formData),
                          xhrFields: {withCredentials: true},
                          success: function(edata, textStatus, jqXHR) {
-                           console.log('success execute',edata,textStatus);
-                           next();
-					   },
-					   
-         
-         
+                            console.log('success execute',edata,textStatus);
+                           setTimeout(function(){                          
+                            $.ajax({
+                                  url: "http://147.102.4.106:10000/bonita/API/bpm/humanTask?p=0&c=10&f=caseId="+caseId+"&f=state=ready",
+                                  type: "GET",
+                                  headers: {'X-Bonita-API-Token': apiToken},
+                                  xhrFields: {withCredentials: true},
+                                  success: function(adata, textStatus, jqXHR) {
+                                     console.log("tasks",adata);
+                                      window.location.replace("http://147.102.4.106:10000/bonita/portal/form/taskInstance/"+adata[0].id);
+                                  
+                                        },
+                                  error: function(jqXHR, textStatus, errorThrown) {
+                                        console.log('error get humantasks',textStatus,errorThrown,jqXHR);
+                                    next(errorThrown)  
+                                    }
+                                   });
+
+                                  },3000);
+
+                         //to formio
+                         //next();
+		        }, 
                          error: function(jqXHR, textStatus, errorThrown) {
-                           console.log('error execute',textStatus);
+                           console.log('error execute',textStatus,errorThrown,jqXHR);
                            next(errorThrown)
                          }
-                });              
-         
-         
-         
-                             // call to save on formio also.
-                 //   next();
-                      }
-				  }
-              }    
-         
-         
-         
-         
-         
-         
-         
-         
+                });
+
+    }, 
+    error: function(jqXHR, textStatus, errorThrown) {
+                 console.log('error assign',textStatus,errorThrown,jqXHR);
+                           next(errorThrown)
+                    }
+    });     
+
+ }, 
+               error: function(jqXHR, textStatus, errorThrown) {
+                      console.log('error get task data',textStatus,errorThrown,jqXHR);
+                         next(errorThrown)
+                         }
+                   });
+
+                           }
+		  }
+              }
          ).then(function(form) {
 			 
-	     //TODO load context and populate from bussines data an prossess variables
-          var context="";
-          var pdata="";
-          var task="";
-          
-                 $.ajax({
-                         url: "http://10.1.32.95:8080/bonita/API/bpm/userTask/"+taskId+"/context", //TODO pare to tskid apo to url query
-                         type: "GET",
-                         headers: {'X-Bonita-API-Token': apiToken},
-                          xhrFields: {withCredentials: true},
-                         success: function(context_json, textStatus, jqXHR) {
-
-						    context = context_json;
-							console.log("context",context);	 
-							 
-							 
-						$.ajax({
-                         url: "http://10.1.32.95:8080/bonita/"+context.basic_ref.link,
-                         type: "GET",
-                         headers: {'X-Bonita-API-Token': apiToken},
-                          xhrFields: {withCredentials: true},
-                         success: function(pdata_json, textStatus, jqXHR) {
-							 pdata=pdata_json;
-							 console.log("pdata",pdata);
-							 
-							 form.submission = {
-                                       data: {
-                                     name: pdata.name,
-                                      lastname: pdata.lastname,
-                                pvtest: 'joe@example.com'
-                                     }
-		                            }
-							 
-							 
-							 
-						 },
-                         error: function(jqXHR, textStatus, errorThrown) {
-                           console.log('error get pdata',textStatus);
-                         }
-					 })
-							 
-							 
-							 
-						 },
-                         error: function(jqXHR, textStatus, errorThrown) {
-                           console.log('error get context',textStatus);
-                         }
-					 })
-        
-        
-  //       form.submission = {
-  //            data: {
-  //              name: 'Joe',
-  //              lastname: 'Smith',
-  //              pvtest: 'joe@example.com'
-  //           }
-	//	 }
-        
-        
-        
-        
-        
         form.on("submit", (submission) => {
-				 
-				 
                  console.log('The form was just submitted!!!',submission);
-                  });
+  
+                });
                   
-               form.on('error', (errors) => {
-    console.log('We have errors!',errors);
+        form.on('error', (errors) => {
+                     console.log('We have errors!',errors);
   })     
   });
 };
       
-      
-    //  formio.loadForm().then(function(form) {
-      
-        // Log the form schema.
-     //   console.log(form);
-        /*
-        formio.saveSubmission({data: {
-          firstName: 'Joe',
-          lastName: 'Smith',
-          pvtest: 'joe@example.com'
-        }}).then(function(submission) {
-        
-          // Log the full submission object.
-          console.log(submission);
-        });
-        */
-   ///   });
-        
-        
-
-      
-
+       
       
     </script>
   </head>
@@ -184,3 +128,4 @@
     <div id='formio'></div>
   </body>
 </html>
+
